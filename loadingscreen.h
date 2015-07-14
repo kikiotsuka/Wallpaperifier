@@ -1,0 +1,23 @@
+#ifndef LOADINGSCREEN_H
+#define LOADINGSCREEN_H
+
+#include <SFML/Graphics.hpp>
+
+#include "infoscreen.h"
+
+//call python to get file list
+#ifdef _WIN64 //windows 64 bit
+const std::string PYTHON_CALL = "py wallinfo.py";
+#else //unix systems
+const std::string PYTHON_CALL = "python wallinfo.py";
+#endif
+
+class LoadingScreen : public InfoScreen {
+private:
+    void process_images();
+public:
+    LoadingScreen(std::string s);
+    void run(sf::RenderWindow &window);
+};
+
+#endif // LOADINGSCREEN_H
