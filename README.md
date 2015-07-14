@@ -1,6 +1,6 @@
 # Wallpaperify
 
-Takes images and facilitates resizing/cropping process
+Create wallpapers by facilitating the resizing/cropping process of images that don't fit the user's screen resolution
 
 # Dependancies
 
