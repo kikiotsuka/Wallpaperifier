@@ -1,18 +1,15 @@
-Wallpaperify program version 1.0.2 By Mitsuru Otsuka
+Wallpaperify program By Mitsuru Otsuka
 
 This program exists to take a directory filled with wallpapers and resize them so that they fit
 the user's computer's screen resolution, by resizing and cropping them.
 
+===Initial Setup===
 
-===SETUP INSTRUCTIONS===
+Run the program and select the directory that contains your wallpapers
 
-Create a file called "wallpaperlocation.txt". Inside of it, type in the path to the
-directory filled with your wallpapers.
+===Changing Wallpaper Directory===
 
-Ex:
-    Windows: C:\Users\MyUser\Pictures\Wallpapers
-    Unix: /home/myuser/wallpapers
-
+Delete 'wallpaperlocation.txt' located in the same place you ran the program from
 
 ===USAGE INSTRUCTIONS===
 
@@ -41,10 +38,4 @@ Use the number pad to move the image around.
 You can also hold Control and use the direction keys as a substitute for the numberpad directions.
 
 If using Control + Direction keys as a substitute, press '5' to center the image
-
 Press P to skip the current image and come back to it later
-
-===ERROR CODES===
-
-Error Code: 1: You didn't create "wallpaperlocation.txt". See "SETUP INSTRUCTIONS"
-Error Code: 2: The path specified inside "wallpaperlocation.txt" is invalid.

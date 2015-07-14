@@ -12,6 +12,6 @@ void LoadingScreen::run(sf::RenderWindow &window) {
 }
 
 void LoadingScreen::process_images() {
-    system(PYTHON_CALL.c_str());
+    system(PYTHON_PROCESS_IMAGES.c_str());
     finished = true;
 }

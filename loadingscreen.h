@@ -7,9 +7,9 @@
 
 //call python to get file list
 #ifdef _WIN64 //windows 64 bit
-const std::string PYTHON_CALL = "py wallinfo.py";
+const std::string PYTHON_PROCESS_IMAGES = "py wallinfo.py";
 #else //unix systems
-const std::string PYTHON_CALL = "python wallinfo.py";
+const std::string PYTHON_PROCESS_IMAGES = "python wallinfo.py";
 #endif
 
 class LoadingScreen : public InfoScreen {

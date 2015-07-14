@@ -8,7 +8,17 @@
 #include "loadingscreen.h"
 #include "imagemanipulation.h"
 
-const std::string VERSION = "0.5.0";
+const std::string VERSION = "0.6.0";
+
+const int DIRECTORY_EXISTS = 0;
+const int DIRECTORY_INVALID = 1;
+
+//call python to get file list
+#ifdef _WIN64 //windows 64 bit
+const std::string PYTHON_SELECT_DIR = "py wallfolderselector.py";
+#else //unix systems
+const std::string PYTHON_SELECT_DIR = "python wallfolderselector.py";
+#endif
 
 bool check_if_file_exists(std::string fname);
 void write_screen_resolution(int &screen_width, int &screen_height);
@@ -17,51 +27,48 @@ void position_text(sf::Vector2f loc, std::string str, sf::Text &text);
 void display_text(sf::RenderWindow &window, sf::Text text);
 
 int main(int argc, char** argv) {
+    //check if wallpaper folder exists
+    int directory_exist = assert_wallpaper_directory();
+    //if it doesn't exist or is invalid
+    if (directory_exist == DIRECTORY_INVALID) {
+        system(PYTHON_SELECT_DIR.c_str());
+    }
+
+    //check if the python call succeeded
+    directory_exist = assert_wallpaper_directory();
+    bool success = directory_exist == DIRECTORY_EXISTS ? true : false;
+
     int screen_width, screen_height;
     write_screen_resolution(screen_width, screen_height);
     const int WINDOW_WIDTH = screen_width * 0.85;
     const int WINDOW_HEIGHT = screen_height * 0.85;
 
-    int directory_exist = assert_wallpaper_directory();
-
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(500, 500), "Wallpaperifier by Mitsuru Otsuka",
+    sf::RenderWindow window(sf::VideoMode(500, 500), "Wallpaperifier Version " + VERSION + " by Mitsuru Otsuka",
                             sf::Style::Titlebar | sf::Style::Close, settings);
     window.setFramerateLimit(120);
     window.setKeyRepeatEnabled(false);
 
-    sf::Font font;
-    font.loadFromFile("media/times.ttf");
-    sf::Text text("", font, 30);
-    if (directory_exist != 0) {
-        std::string fail_str;
-        if (directory_exist == 1) {
-            fail_str = "Error Code 1: No path found. See instructions.txt for more details.";
-        } else {
-            fail_str = "Error Code 2: Invalid directory path. See instructions.txt for more details.";
-        }
-        fail_str += "\nPress Q or ESC to exit the program";
-        position_text(sf::Vector2f(25.0, 25.0), fail_str, text);
-        display_text(window, text);
-    } else {
+    if (success) {
         //Check images, show loading screen while checking
         LoadingScreen loadingscreen("Processing Images... Please wait Nyaa~");
         loadingscreen.run(window);
 
-        if (check_if_file_exists("toresize.txt")) {
-            //start image manipulation program
-            ImageManipulation imagemanipulation(screen_width, screen_height);
-            imagemanipulation.run(window);
-        } else {
-            std::string nothing_to_change = "There are no more images that need to be changed.";
-            nothing_to_change += "\nPress Q or ESC to exit the program";
-            position_text(sf::Vector2f(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0), nothing_to_change, text);
-            display_text(window, text);
-        }
+        //start image manipulation program
+        ImageManipulation imagemanipulation(screen_width, screen_height);
+        imagemanipulation.run(window);
+
+        InfoScreen infoscreen("All Images Finished Processing Nyaa~");
+        infoscreen.run(window);
+    } else {
+        sf::Font font;
+        font.loadFromFile("media/times.ttf");
+        sf::Text text("", font, 23);
+        std::string error_text = "Error: Invalid directory, try restarting the program\nPress ESC to exit";
+        position_text(sf::Vector2f(250, 250), error_text, text);
+        display_text(window, text);
     }
-    InfoScreen infoscreen("All Images Finished Processing Nyaa~");
-    infoscreen.run(window);
 }
 
 bool check_if_file_exists(std::string fname) {
@@ -85,9 +92,9 @@ int assert_wallpaper_directory() {
         std::string wallpaper_location;
         std::ifstream test_exist("wallpaperlocation.txt");
         getline(test_exist, wallpaper_location);
-        return check_if_file_exists(wallpaper_location) ? 0 : 2;
+        return check_if_file_exists(wallpaper_location) ? DIRECTORY_EXISTS : DIRECTORY_INVALID;
     }
-    return 1;
+    return DIRECTORY_INVALID;
 }
 
 void position_text(sf::Vector2f loc, std::string str, sf::Text &text) {
@@ -103,7 +110,7 @@ void display_text(sf::RenderWindow &window, sf::Text text) {
         while (window.pollEvent(e)) {
             if (e.type == sf::Event::Closed) window.close();
             if (e.type == sf::Event::KeyPressed) {
-                if (e.key.code == sf::Keyboard::Q || e.key.code == sf::Keyboard::Escape)
+                if (e.key.code == sf::Keyboard::Escape)
                     window.close();
             }
         }
