@@ -7,14 +7,14 @@ InfoScreen::InfoScreen(std::string s) {
 
 void InfoScreen::run(sf::RenderWindow &window) {
     sf::Texture texture;
-    texture.loadFromFile("loading_icon.jpg");
+    texture.loadFromFile("media/loading_icon.jpg");
     sf::Sprite sprite(texture);
     sf::FloatRect fr = sprite.getGlobalBounds();
     sprite.setOrigin(fr.width / 2.0, fr.height / 2.0);
     sprite.setPosition(window.getSize().x / 2.0, window.getSize().y / 2.0 * 1.25);
 
     sf::Font font;
-    if (!font.loadFromFile("times.ttf")) {
+    if (!font.loadFromFile("media/times.ttf")) {
         window.close();
     }
     sf::Text text(message, font, 30);

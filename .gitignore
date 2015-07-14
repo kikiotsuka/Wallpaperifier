@@ -1,0 +1,9 @@
+obj
+bin
+*.cbp
+*.layout
+wallpaperify
+screenres.txt
+toresize.txt
+failed.txt
+wallpaperlocation.txt

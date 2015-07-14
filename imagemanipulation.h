@@ -42,7 +42,6 @@ private:
     double window_aspect_ratio;
     sf::Texture texture;
     sf::Sprite sprite;
-    sf::Font font;
 
     int crop_image(sf::RenderWindow &window, std::string fname);
     int minimalistify_image(sf::RenderWindow &window, std::string fname);

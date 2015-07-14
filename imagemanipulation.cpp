@@ -12,7 +12,6 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 
     finalize = false;
     is_black = true;
-    font.loadFromFile("times.ttf");
     readtochangelist();
 
     for (int i = 0; i < 2; i++) {
@@ -347,11 +346,4 @@ void ImageManipulation::reset_window(sf::RenderWindow &window, int w_width, int 
     window.setPosition(sf::Vector2i((screen_dim.x - w_width) / 2.0, (screen_dim.y - w_height) / 2.0));
     sf::View view(sf::FloatRect(0, 0, w_width, w_height));
     window.setView(view);
-}
-
-void ImageManipulation::position_text(sf::Vector2f loc, std::string str, sf::Text &text) {
-    text.setString(str);
-    sf::FloatRect fr = text.getGlobalBounds(); 
-    text.setPosition(loc.x - fr.width / 2.0, loc.y - fr.height / 2.0);
-    text.setColor(sf::Color::Black);
 }

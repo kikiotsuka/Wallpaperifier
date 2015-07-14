@@ -1,0 +1,50 @@
+Wallpaperify program version 1.0.2 By Mitsuru Otsuka
+
+This program exists to take a directory filled with wallpapers and resize them so that they fit
+the user's computer's screen resolution, by resizing and cropping them.
+
+
+===SETUP INSTRUCTIONS===
+
+Create a file called "wallpaperlocation.txt". Inside of it, type in the path to the
+directory filled with your wallpapers.
+
+Ex:
+    Windows: C:\Users\MyUser\Pictures\Wallpapers
+    Unix: /home/myuser/wallpapers
+
+
+===USAGE INSTRUCTIONS===
+
+Press 'c' to switch modes between Resize and Crop Mode and Minimalistic Mode.
+
+=Resize and Crop Mode=
+
+Use arrow keys, WASD or your mouse to move the rectangular region.
+Hold shift to move the rectangular region by one pixel per button press.
+Press enter to lock in selected region and show preview mode, enter again to finalize changes.
+Press escape to unlock the selected region and exit preview mode.
+Press space to invert the region selector and preview mode shaded box.
+Use the number pad to teleport region selector around.
+You can also hold Control and use the direction keys as a substitute for the numberpad directions.
+If using Control + Direction keys as a substitute, press '5' to center the image
+Press P to skip the current image and come back to it later
+
+=Minimalistic Mode=
+
+Use arrow keys, WASD, or your mouse to move the image around.
+Hold shift to move the rectangular region by one pixel per button press.
+Press enter to lock in image location and show preview mode, enter again to finalize changes.
+Press escape to unlock the image location and exit preview mode.
+Press 'f' and mouse over a pixel to flood the background with that selected pixel color.
+Use the number pad to move the image around.
+You can also hold Control and use the direction keys as a substitute for the numberpad directions.
+
+If using Control + Direction keys as a substitute, press '5' to center the image
+
+Press P to skip the current image and come back to it later
+
+===ERROR CODES===
+
+Error Code: 1: You didn't create "wallpaperlocation.txt". See "SETUP INSTRUCTIONS"
+Error Code: 2: The path specified inside "wallpaperlocation.txt" is invalid.
