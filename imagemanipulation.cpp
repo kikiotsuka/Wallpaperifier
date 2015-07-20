@@ -12,6 +12,7 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 
     finalize = false;
     is_black = true;
+    mouse_down = false;
     readtochangelist();
 }
 
@@ -22,18 +23,23 @@ void ImageManipulation::run(sf::RenderWindow &window) {
         imgnames.pop();   
         texture.loadFromFile(current);
         texture.setSmooth(true);
-        sprite.setTexture(texture, true);
-
-        //reset variables
-        finalize = false;
-        is_black = true;
-
+    
         int image_status = IMAGE_SUCCESS;
         int force_mode = 0;
         //if force mode is 1, run crop_image
         //if force mode is 2, run minimalistify_image
-        sf::Vector2f sprite_dim(sprite.getGlobalBounds().height, sprite.getGlobalBounds().width);
         do {
+            sprite.setPosition(0, 0);
+            sprite.setScale(1.0, 1.0);
+            sprite.setTexture(texture, true);
+
+            //reset variables
+            finalize = false;
+            is_black = true;
+            mouse_down = false;
+
+            sf::Vector2f sprite_dim(sprite.getGlobalBounds().height, sprite.getGlobalBounds().width);
+
             if (force_mode == 1 || (force_mode == 0 && sprite_dim.x < sprite_dim.y)) {
                 image_status = crop_image(window, current);
                 if (image_status == IMAGE_SWITCH) {
@@ -279,6 +285,14 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
 
     reset_window(window, target_dim.x, target_dim.y);
 
+    //use to obtain pixel color at coordinate
+    sf::RenderTexture rt;
+    rt.create(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
+    rt.setSmooth(true);
+    rt.draw(sprite);
+    rt.display();
+    sf::Image img = rt.getTexture().copyToImage();
+
     initialize_selector(MODE_MINIMALISTIC);
 
     bool key_f = false;
@@ -291,7 +305,7 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
             if (e.type == sf::Event::Closed) {
                 window.close();
             } else if (e.type == sf::Event::KeyPressed) {
-                if (!finalize) {
+                if (!finalize && !key_f) {
                     switch (e.key.code) {
                     case sf::Keyboard::Escape:
                         window.close();
@@ -363,15 +377,18 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                         finalize = true;
                         break;
                     }
-                } else {
+                } else if (finalize) {
                     if (e.key.code == sf::Keyboard::Return) {
-                        if (!generate_minimalist_image(fname)) {
+                        if (!generate_minimalist_image(fname, fill_color)) {
                             image_status = IMAGE_FAILURE;
                         }
                         working = false;
                     } else if (e.key.code == sf::Keyboard::Escape) {
                         finalize = false;
                     }
+                } else if (key_f) {
+                    key_f = false;
+                    fill_color = sf::Color::White;
                 }
             } else if (e.type == sf::Event::KeyReleased) {
                 switch (e.key.code) {
@@ -391,9 +408,6 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                 case sf::Keyboard::Left:
                     selector.set_dir(LEFT, false);
                     break;
-                case sf::Keyboard::F:
-                    key_f = false;
-                    break;
                 case sf::Keyboard::LShift:
                 case sf::Keyboard::RShift:
                     selector.set_shift(false);
@@ -408,9 +422,13 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                 }
             } else if (e.type == sf::Event::MouseButtonPressed) {
                 if (e.mouseButton.button == sf::Mouse::Left) {
-                    mouse_down = true;
-                    movement.first = sf::Vector2i(e.mouseButton.x, e.mouseButton.y);
-                    movement.second = movement.first;
+                    if (!key_f) {
+                        mouse_down = true;
+                        movement.first = sf::Vector2i(e.mouseButton.x, e.mouseButton.y);
+                        movement.second = movement.first;
+                    } else {
+                        key_f = false;
+                    }
                 }
             } else if (e.type == sf::Event::MouseButtonReleased) {
                 if (e.mouseButton.button == sf::Mouse::Left) {
@@ -422,8 +440,15 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                 if (mouse_down) {
                     movement.first = movement.second;
                     movement.second = sf::Vector2i(e.mouseMove.x, e.mouseMove.y);
-                    //TODO
-                    //move image and recorrect its location
+                    selector.move_with_mouse(movement.first, movement.second);
+                } else if (key_f) {
+                    sf::Vector2i pixel(e.mouseMove.x - selector.get_loc().x, e.mouseMove.y - selector.get_loc().y);
+                    if (pixel.x < 0 || pixel.y < 0 ||
+                        pixel.x > sprite.getGlobalBounds().width || pixel.y > sprite.getGlobalBounds().height) {
+                        fill_color = sf::Color::White;
+                    } else {
+                        fill_color = img.getPixel(pixel.x, pixel.y);
+                    }
                 }
             }
             
@@ -436,8 +461,8 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
             }
         }
         selector.update();
-
         sprite.setPosition(selector.get_loc());
+
         window.clear(fill_color);
         window.draw(sprite);
         selector.draw(window);
@@ -509,14 +534,24 @@ bool ImageManipulation::generate_crop_image(std::string imgname, double unusedsc
     rt.setSmooth(true);
     rt.draw(sprite);
     rt.display();
-    std::cout << sprite.getGlobalBounds().width << " " << sprite.getGlobalBounds().height << "\n";
-    std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << "\n";
-    std::cout << unusedscale << " " << screen_scale << "\n";
     return write_image(imgname, rt.getTexture());
 }
 
-bool ImageManipulation::generate_minimalist_image(std::string imgname) {
-    return true;
+bool ImageManipulation::generate_minimalist_image(std::string imgname, sf::Color fill_color) {
+    double screen_scale = target_dim.y / sprite.getGlobalBounds().height / SCREEN_FRACTION;
+    sprite.setScale(screen_scale, screen_scale);
+    sprite.setPosition(sprite.getPosition().x * screen_scale, sprite.getPosition().y * screen_scale);
+
+    std::cout << "size: " << sprite.getGlobalBounds().width << " " << sprite.getGlobalBounds().height << "\n";
+    std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << "\n";
+
+    sf::RenderTexture rt;
+    rt.create(screen_dim.x, screen_dim.y);
+    rt.clear(fill_color);
+    rt.setSmooth(true);
+    rt.draw(sprite);
+    rt.display();
+    return write_image(imgname, rt.getTexture());
 }
 
 bool ImageManipulation::write_image(std::string imgname, const sf::Texture &t) {

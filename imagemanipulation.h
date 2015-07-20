@@ -56,7 +56,7 @@ private:
 
     void init_preview_box();
     bool generate_crop_image(std::string imgname, double unusedscale);
-    bool generate_minimalist_image(std::string imgname);
+    bool generate_minimalist_image(std::string imgname, sf::Color fill_color);
     bool write_image(std::string imgname, const sf::Texture &t);
 
     void readtochangelist();
