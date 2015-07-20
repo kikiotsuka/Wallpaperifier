@@ -33,9 +33,9 @@ Use arrow keys, WASD, or your mouse to move the image around.
 Hold shift to move the rectangular region by one pixel per button press.
 Press enter to lock in image location and show preview mode, enter again to finalize changes.
 Press escape to unlock the image location and exit preview mode.
-Press 'f' and mouse over a pixel to flood the background with that selected pixel color.
+Press 'f' and click a pixel to flood the background with that selected pixel color.
+Press 'f' then backspace to clear the selected pixel color.
 Use the number pad to move the image around.
 You can also hold Control and use the direction keys as a substitute for the numberpad directions.
-
 If using Control + Direction keys as a substitute, press '5' to center the image
 Press P to skip the current image and come back to it later

@@ -13,17 +13,8 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
     finalize = false;
     is_black = true;
     readtochangelist();
-
-    for (int i = 0; i < 2; i++) {
-        preview_box[i].setOutlineThickness(0);
-    }
 }
 
-//TODO
-/*
-    selector box
-    fill in color box
-*/
 void ImageManipulation::run(sf::RenderWindow &window) {
     while (window.isOpen() && !imgnames.empty()) {
         std::string current = imgnames.front();
@@ -74,6 +65,11 @@ void ImageManipulation::run(sf::RenderWindow &window) {
 
 //Function returns true on success, false when user wishes to skip image
 int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
+    //initialize preview boxes
+    for (int i = 0; i < 2; i++) {
+        preview_box[i].setOutlineThickness(0);
+    }
+
     int image_status = IMAGE_SUCCESS;
 
     double horz_scale = target_dim.x / texture.getSize().x;
@@ -99,9 +95,19 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
     std::cout << "After Dimension: (" << sprite.getGlobalBounds().width << ", " <<
         sprite.getGlobalBounds().height << ")" << "\n";
 
-    initialize_selector();
+    initialize_selector(MODE_CROP);
 
     bool working = true;
+
+    //check if the selected image already has the correct aspect ratio for auto resizing
+    double diff = window_aspect_ratio - (sprite.getGlobalBounds().width / sprite.getGlobalBounds().height);
+    if (fabs(diff) < EPSILON) {
+        working = false;
+        if (!generate_crop_image(fname, vert_scale + horz_scale - selected_scale)) {
+            image_status = IMAGE_FAILURE;
+        }
+    }
+
     while (window.isOpen() && working) {
         sf::Event e;
         while (window.pollEvent(e)) {
@@ -175,7 +181,7 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
                     }
                 } else {
                     if (e.key.code == sf::Keyboard::Return) {
-                        if (!generate_image(fname, vert_scale + horz_scale - selected_scale)) {
+                        if (!generate_crop_image(fname, vert_scale + horz_scale - selected_scale)) {
                             image_status = IMAGE_FAILURE;
                         }
                         working = false;
@@ -238,7 +244,6 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
             }
         }
         //because pressing control doesn't trigger an event unless you do shift + control
-        //at least on Arch
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || 
             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
             selector.set_control(true);
@@ -266,25 +271,207 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
 int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string fname) {
     int image_status = IMAGE_SUCCESS;
     std::cout << "Minimalist mode" << "\n";
+    //check if the image is bigger than the window, if so resize it
+    if (sprite.getGlobalBounds().height > target_dim.y) {
+        double vert_scale = target_dim.y / sprite.getGlobalBounds().height;
+        sprite.setScale(vert_scale, vert_scale);
+    }
+
+    reset_window(window, target_dim.x, target_dim.y);
+
+    initialize_selector(MODE_MINIMALISTIC);
+
+    bool key_f = false;
+    sf::Color fill_color = sf::Color::White;
+
+    bool working = true;
+    while (window.isOpen() && working) {
+        sf::Event e;
+        while (window.pollEvent(e)) {
+            if (e.type == sf::Event::Closed) {
+                window.close();
+            } else if (e.type == sf::Event::KeyPressed) {
+                if (!finalize) {
+                    switch (e.key.code) {
+                    case sf::Keyboard::Escape:
+                        window.close();
+                        break;
+                    case sf::Keyboard::W:
+                    case sf::Keyboard::Up:
+                        selector.set_dir(UP, true);
+                        break;
+                    case sf::Keyboard::S:
+                    case sf::Keyboard::Down:
+                        selector.set_dir(DOWN, true);
+                        break;
+                    case sf::Keyboard::D:
+                    case sf::Keyboard::Right:
+                        selector.set_dir(RIGHT, true);
+                        break;
+                    case sf::Keyboard::A:
+                    case sf::Keyboard::Left:
+                        selector.set_dir(LEFT, true);
+                        break;
+                    case sf::Keyboard::Numpad8:
+                        selector.teleport(UP);
+                        break;
+                    case sf::Keyboard::Numpad2:
+                        selector.teleport(DOWN);
+                        break;
+                    case sf::Keyboard::Numpad4:
+                        selector.teleport(LEFT);
+                        break;
+                    case sf::Keyboard::Numpad6:
+                        selector.teleport(RIGHT);
+                        break;
+                    case sf::Keyboard::Numpad5:
+                    case sf::Keyboard::Num5:
+                        selector.teleport(CENTER);
+                        break;
+                    case sf::Keyboard::Space:
+                        is_black = !is_black;
+                        selector.toggle_color();
+                        break;
+                    case sf::Keyboard::C:
+                        image_status = IMAGE_SWITCH;
+                        working = false;
+                        break;
+                    case sf::Keyboard::P:
+                        image_status = IMAGE_SKIP;
+                        working = false;
+                        break;
+                    case sf::Keyboard::F:
+                        key_f = true;
+                        break;
+                    case sf::Keyboard::BackSpace:
+                        if (key_f) {
+                            fill_color = sf::Color::White;
+                        }
+                        break;
+                    case sf::Keyboard::LShift:
+                    case sf::Keyboard::RShift:
+                        selector.set_shift(true);
+                        break;
+                    /*
+                    //Because pressing control key on Arch doesn't work
+                    case sf::Keyboard::LControl:
+                    case sf::Keyboard::RControl:
+                        std::cout << "CONTROL KEY WAS PRESSED" << "\n";
+                        break;
+                    */
+                    case sf::Keyboard::Return:
+                        finalize = true;
+                        break;
+                    }
+                } else {
+                    if (e.key.code == sf::Keyboard::Return) {
+                        if (!generate_minimalist_image(fname)) {
+                            image_status = IMAGE_FAILURE;
+                        }
+                        working = false;
+                    } else if (e.key.code == sf::Keyboard::Escape) {
+                        finalize = false;
+                    }
+                }
+            } else if (e.type == sf::Event::KeyReleased) {
+                switch (e.key.code) {
+                case sf::Keyboard::W:
+                case sf::Keyboard::Up:
+                    selector.set_dir(UP, false);
+                    break;
+                case sf::Keyboard::S:
+                case sf::Keyboard::Down:
+                    selector.set_dir(DOWN, false);
+                    break;
+                case sf::Keyboard::D:
+                case sf::Keyboard::Right:
+                    selector.set_dir(RIGHT, false);
+                    break;
+                case sf::Keyboard::A:
+                case sf::Keyboard::Left:
+                    selector.set_dir(LEFT, false);
+                    break;
+                case sf::Keyboard::F:
+                    key_f = false;
+                    break;
+                case sf::Keyboard::LShift:
+                case sf::Keyboard::RShift:
+                    selector.set_shift(false);
+                    break;
+                /*
+                //For some reason pressing control keys doesn't work on Arch
+                case sf::Keyboard::LControl:
+                case sf::Keyboard::RControl:
+                    std::cout << "CONTROL KEY WAS RELEASED" << "\n";
+                    break;
+                */
+                }
+            } else if (e.type == sf::Event::MouseButtonPressed) {
+                if (e.mouseButton.button == sf::Mouse::Left) {
+                    mouse_down = true;
+                    movement.first = sf::Vector2i(e.mouseButton.x, e.mouseButton.y);
+                    movement.second = movement.first;
+                }
+            } else if (e.type == sf::Event::MouseButtonReleased) {
+                if (e.mouseButton.button == sf::Mouse::Left) {
+                    mouse_down = false;
+                    movement.first = sf::Vector2i();
+                    movement.second = sf::Vector2i();
+                }
+            } else if (e.type == sf::Event::MouseMoved) {
+                if (mouse_down) {
+                    movement.first = movement.second;
+                    movement.second = sf::Vector2i(e.mouseMove.x, e.mouseMove.y);
+                    //TODO
+                    //move image and recorrect its location
+                }
+            }
+            
+            //because pressing control doesn't trigger an event unless you do shift + control
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || 
+                sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
+                selector.set_control(true);
+            } else {
+                selector.set_control(false);
+            }
+        }
+        selector.update();
+
+        sprite.setPosition(selector.get_loc());
+        window.clear(fill_color);
+        window.draw(sprite);
+        selector.draw(window);
+        window.display();
+    }
+
     return image_status;
 }
 
 /*
     screen_width / screen_height = new_image_width / new_image_height
 */
-void ImageManipulation::initialize_selector() {
-    sf::Vector2f selector_dim, selector_pos;
-    if (orientation == ORIENTATION_HORIZONTAL) {
-        double sprite_height = sprite.getGlobalBounds().height;
-        selector_dim = sf::Vector2f(window_aspect_ratio * sprite_height, sprite_height);
-        selector_pos = sf::Vector2f((target_dim.x - selector_dim.x) / 2.0, 0);
+void ImageManipulation::initialize_selector(int mode) {
+    if (mode == MODE_CROP) {
+        sf::Vector2f selector_dim, selector_pos;
+        if (orientation == ORIENTATION_HORIZONTAL) {
+            double sprite_height = sprite.getGlobalBounds().height;
+            selector_dim = sf::Vector2f(window_aspect_ratio * sprite_height, sprite_height);
+            selector_pos = sf::Vector2f((target_dim.x - selector_dim.x) / 2.0, 0);
+        } else {
+            double sprite_width = sprite.getGlobalBounds().width;
+            selector_dim = sf::Vector2f(sprite_width, sprite_width / window_aspect_ratio);
+            selector_pos = sf::Vector2f(0, (target_dim.y - selector_dim.y) / 2.0);
+        } 
+        sf::Vector2f img_dim(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
+        selector = SelectorBox(selector_dim, selector_pos, img_dim, is_black);
     } else {
-        double sprite_width = sprite.getGlobalBounds().width;
-        selector_dim = sf::Vector2f(sprite_width, sprite_width / window_aspect_ratio);
-        selector_pos = sf::Vector2f(0, (target_dim.y - selector_dim.y) / 2.0);
-    } 
-    sf::Vector2f img_dim(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
-    selector = SelectorBox(selector_dim, selector_pos, img_dim, is_black);
+        sf::Vector2f selector_dim(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
+        sf::Vector2f selector_pos(target_dim.x - selector_dim.x, target_dim.y - selector_dim.y);
+
+        selector = SelectorBox(selector_dim, selector_pos, target_dim, is_black);
+        selector.set_outline_width(0);
+        sprite.setPosition(selector.get_loc());
+    }
 }
 
 void ImageManipulation::init_preview_box() {
@@ -311,7 +498,7 @@ void ImageManipulation::init_preview_box() {
     }
 }
 
-bool ImageManipulation::generate_image(std::string imgname, double unusedscale) {
+bool ImageManipulation::generate_crop_image(std::string imgname, double unusedscale) {
     double screen_scale = unusedscale / SCREEN_FRACTION;
     std::cout << "Selector coord: (" << selector.get_loc().x << ", " << selector.get_loc().y << ")\n";
     std::cout << "Selector size: (" << selector.get_size().x << ", " << selector.get_size().y << ")\n";
@@ -326,6 +513,10 @@ bool ImageManipulation::generate_image(std::string imgname, double unusedscale) 
     std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << "\n";
     std::cout << unusedscale << " " << screen_scale << "\n";
     return write_image(imgname, rt.getTexture());
+}
+
+bool ImageManipulation::generate_minimalist_image(std::string imgname) {
+    return true;
 }
 
 bool ImageManipulation::write_image(std::string imgname, const sf::Texture &t) {

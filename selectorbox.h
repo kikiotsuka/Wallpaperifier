@@ -39,6 +39,7 @@ public:
     void set_dir(int dir, bool state);
     void set_shift(bool state);
     void set_control(bool state);
+    void set_outline_width(double width);
     void toggle_color();
     void draw(sf::RenderWindow &window);
     sf::Vector2f get_size();

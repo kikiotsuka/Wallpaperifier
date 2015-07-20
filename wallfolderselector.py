@@ -14,7 +14,7 @@ root.withdraw()
 home = os.path.expanduser('~')
 dirname = askdirectory(parent=root, initialdir=home, title="Select wallpaper directory", mustexist=True)
 
-if os.name == 'nt':
+if os.name == 'nt': #windows
     dirname = dirname.replace('/', '\\')
 
 if len(dirname) > 0:

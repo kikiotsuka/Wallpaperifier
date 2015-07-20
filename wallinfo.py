@@ -1,4 +1,5 @@
 import struct
+import pathlib
 import os
 import imghdr
 
@@ -51,13 +52,15 @@ with open('screenres.txt') as f:
 toresize = []
 failed = []
 os.chdir(wallpaperpath)
-wallpaperlist = [f for f in os.listdir('.') if os.path.isfile(f)]
+
+p = pathlib.Path()
+wallpaperlist = list(p.rglob('*.jpg')) + list(p.rglob('*.jpeg')) + \
+                list(p.rglob('*.png')) + list(p.rglob('*.gif'))
+wallpaperlist = [str(f) for f in wallpaperlist]
 for i, f in enumerate(wallpaperlist):
     img_loc = os.path.abspath(f)
     with open(f, 'rb') as fbyte:
-        #size, ext = bytes_to_size(fbyte.read(24))
         size = get_image_size(f)
-        #print(size)
         if size == None:
             failed.append(img_loc)
         elif screendim != size:

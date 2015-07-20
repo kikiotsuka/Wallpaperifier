@@ -6,6 +6,7 @@ SelectorBox::SelectorBox() {
     control_pressed = false;
 }
 
+//window_dim is the bounds that the box can be contained within, which is the size of the image
 SelectorBox::SelectorBox(sf::Vector2f dim, sf::Vector2f loc, sf::Vector2f window_dim, bool is_black) {
     selector.setSize(dim);
     selector.setPosition(loc);
@@ -120,6 +121,10 @@ void SelectorBox::set_control(bool state) {
     if (control_pressed) {
         deselect_directions();
     }
+}
+
+void SelectorBox::set_outline_width(double width) {
+    selector.setOutlineThickness(width);
 }
 
 void SelectorBox::toggle_color() {

@@ -10,6 +10,7 @@
 #include <map>
 #include <fstream>
 #include <cstdio>
+#include <cmath>
 
 #include "selectorbox.h"
 
@@ -22,6 +23,11 @@ const int IMAGE_SUCCESS = 0;
 const int IMAGE_SWITCH = 1;
 const int IMAGE_SKIP = 2;
 const int IMAGE_FAILURE = 3;
+
+const int MODE_CROP = 0;
+const int MODE_MINIMALISTIC = 1;
+
+const double EPSILON = 10e-5;
 
 class ImageManipulation {
 private:
@@ -46,10 +52,11 @@ private:
     int crop_image(sf::RenderWindow &window, std::string fname);
     int minimalistify_image(sf::RenderWindow &window, std::string fname);
 
-    void initialize_selector();
+    void initialize_selector(int mode);
 
     void init_preview_box();
-    bool generate_image(std::string imgname, double unusedscale);
+    bool generate_crop_image(std::string imgname, double unusedscale);
+    bool generate_minimalist_image(std::string imgname);
     bool write_image(std::string imgname, const sf::Texture &t);
 
     void readtochangelist();
