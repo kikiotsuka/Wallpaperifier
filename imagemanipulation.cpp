@@ -537,8 +537,13 @@ bool ImageManipulation::generate_crop_image(std::string imgname, double unusedsc
     return write_image(imgname, rt.getTexture());
 }
 
+//TODO figure out why this isnt workinggg
+//FIXME something wrong with resizing computation
 bool ImageManipulation::generate_minimalist_image(std::string imgname, sf::Color fill_color) {
     double screen_scale = target_dim.y / sprite.getGlobalBounds().height / SCREEN_FRACTION;
+    std::cout << "s1: " << screen_scale << "\n";
+    screen_scale = screen_dim.y / sprite.getGlobalBounds().height;
+    std::cout << "s2: " << screen_scale << "\n";
     sprite.setScale(screen_scale, screen_scale);
     sprite.setPosition(sprite.getPosition().x * screen_scale, sprite.getPosition().y * screen_scale);
 
