@@ -5,11 +5,6 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
     target_dim = sf::Vector2f(s_width * SCREEN_FRACTION, s_height * SCREEN_FRACTION);
     window_aspect_ratio = screen_dim.x / screen_dim.y;
 
-    std::cout << "===Screen Meta===" << "\n";
-    std::cout << "Screen Dim: (" << screen_dim.x << ", " << screen_dim.y << ")" << "\n";
-    std::cout << "Window Dim: (" << target_dim.x << ", " << target_dim.y << ")" << "\n";
-    std::cout << "Window Aspect Ratio: " << window_aspect_ratio << "\n";
-
     finalize = false;
     is_black = true;
     mouse_down = false;
@@ -19,7 +14,14 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 void ImageManipulation::run(sf::RenderWindow &window) {
     while (window.isOpen() && !imgnames.empty()) {
         std::string current = imgnames.front();
-        std::cout << current << "\n";
+        std::string imgname_without_path = "";
+        for (int i = current.size() - 1; i >= 0; i--) {
+            if (current[i] == '/' || current[i] == '\\') {
+                imgname_without_path = current.substr(i + 1);
+                break;
+            }
+        }
+        window.setTitle(TITLE + " - " + imgname_without_path);
         imgnames.pop();   
         texture.loadFromFile(current);
         texture.setSmooth(true);
@@ -90,16 +92,8 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
         orientation = ORIENTATION_VERTICAL;
     }
 
-    std::cout << "Candidate Scales; Horz: " << horz_scale << "; Vert: " << vert_scale << "\n";
-    std::cout << "Selected Scale: " << selected_scale << "\n";
-    std::cout << "Original Dimension: (" << sprite.getGlobalBounds().width << ", " << 
-        sprite.getGlobalBounds().height << ")" << "\n";
-
     sprite.setScale(selected_scale, selected_scale);
     reset_window(window, sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
-
-    std::cout << "After Dimension: (" << sprite.getGlobalBounds().width << ", " <<
-        sprite.getGlobalBounds().height << ")" << "\n";
 
     initialize_selector(MODE_CROP);
 
@@ -272,11 +266,8 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
     return image_status;
 }
 
-//Function returns true on success, false when user wishes to skip image
-//TODO finish me
 int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string fname) {
     int image_status = IMAGE_SUCCESS;
-    std::cout << "Minimalist mode" << "\n";
     //check if the image is bigger than the window, if so resize it
     if (sprite.getGlobalBounds().height > target_dim.y) {
         double vert_scale = target_dim.y / sprite.getGlobalBounds().height;
@@ -525,8 +516,6 @@ void ImageManipulation::init_preview_box() {
 
 bool ImageManipulation::generate_crop_image(std::string imgname, double unusedscale) {
     double screen_scale = unusedscale / SCREEN_FRACTION;
-    std::cout << "Selector coord: (" << selector.get_loc().x << ", " << selector.get_loc().y << ")\n";
-    std::cout << "Selector size: (" << selector.get_size().x << ", " << selector.get_size().y << ")\n";
     sprite.setScale(screen_scale, screen_scale);
     sprite.setPosition(-selector.get_loc().x * screen_scale, -selector.get_loc().y * screen_scale);
     sf::RenderTexture rt;
@@ -537,18 +526,11 @@ bool ImageManipulation::generate_crop_image(std::string imgname, double unusedsc
     return write_image(imgname, rt.getTexture());
 }
 
-//TODO figure out why this isnt workinggg
-//FIXME something wrong with resizing computation
 bool ImageManipulation::generate_minimalist_image(std::string imgname, sf::Color fill_color) {
-    double screen_scale = target_dim.y / sprite.getGlobalBounds().height / SCREEN_FRACTION;
-    std::cout << "s1: " << screen_scale << "\n";
-    screen_scale = screen_dim.y / sprite.getGlobalBounds().height;
-    std::cout << "s2: " << screen_scale << "\n";
-    sprite.setScale(screen_scale, screen_scale);
+    //note usage of scale instead of setscale, it is relative to our current scale
+    double screen_scale = screen_dim.y / sprite.getGlobalBounds().height;
+    sprite.scale(screen_scale, screen_scale);
     sprite.setPosition(sprite.getPosition().x * screen_scale, sprite.getPosition().y * screen_scale);
-
-    std::cout << "size: " << sprite.getGlobalBounds().width << " " << sprite.getGlobalBounds().height << "\n";
-    std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << "\n";
 
     sf::RenderTexture rt;
     rt.create(screen_dim.x, screen_dim.y);

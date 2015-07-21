@@ -29,6 +29,8 @@ const int MODE_MINIMALISTIC = 1;
 
 const double EPSILON = 10e-5;
 
+extern const std::string TITLE;
+
 class ImageManipulation {
 private:
     SelectorBox selector;

@@ -8,7 +8,8 @@
 #include "loadingscreen.h"
 #include "imagemanipulation.h"
 
-const std::string VERSION = "0.6.0";
+extern const std::string VERSION = "1.0.0";
+extern const std::string TITLE = "Wallpaperify Version " + VERSION + " by Mitsuru Otsuka";
 
 const int DIRECTORY_EXISTS = 0;
 const int DIRECTORY_INVALID = 1;
@@ -45,8 +46,7 @@ int main(int argc, char** argv) {
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(500, 500), "Wallpaperifier Version " + VERSION + " by Mitsuru Otsuka",
-                            sf::Style::Titlebar | sf::Style::Close, settings);
+    sf::RenderWindow window(sf::VideoMode(500, 500), TITLE, sf::Style::Titlebar | sf::Style::Close, settings);
     window.setFramerateLimit(120);
     window.setKeyRepeatEnabled(false);
 
