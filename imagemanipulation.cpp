@@ -1,5 +1,11 @@
 #include "imagemanipulation.h"
 
+/*
+    TODO
+        - Implement flipping images horizontally
+        - Implement deleting images with a confirmation thingy
+*/
+
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
     screen_dim = sf::Vector2f(s_width, s_height);
     target_dim = sf::Vector2f(s_width * SCREEN_FRACTION, s_height * SCREEN_FRACTION);
@@ -527,8 +533,8 @@ bool ImageManipulation::generate_crop_image(std::string imgname, double unusedsc
 }
 
 bool ImageManipulation::generate_minimalist_image(std::string imgname, sf::Color fill_color) {
-    //note usage of scale instead of setscale, it is relative to our current scale
-    double screen_scale = screen_dim.y / sprite.getGlobalBounds().height;
+    double screen_scale = screen_dim.x / target_dim.x;
+    //Note the use of scale instead of setScale, the scale is relative to the current scale
     sprite.scale(screen_scale, screen_scale);
     sprite.setPosition(sprite.getPosition().x * screen_scale, sprite.getPosition().y * screen_scale);
 
