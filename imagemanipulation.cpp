@@ -4,6 +4,8 @@
     TODO
         - Implement flipping images horizontally
         - Implement deleting images with a confirmation thingy
+        - Potentially implement image extender
+            - Take one pixel row/column of image and repeat it outwards, only for crop mode
 */
 
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
