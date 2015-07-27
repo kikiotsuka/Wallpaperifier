@@ -20,8 +20,8 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 void ImageManipulation::run(sf::RenderWindow &window) {
     while (window.isOpen() && !imgnames.empty()) {
         std::string current = imgnames.front();
-        const size_t dot_pos = imgnames.rfind('.');
-        std::string imgname_without_path = imgnames.substr(dot_pos + 1);
+        const size_t dot_pos = current.rfind('.');
+        std::string imgname_without_path = current.substr(dot_pos + 1);
         window.setTitle(TITLE + " - " + imgname_without_path);
         imgnames.pop();   
         texture.loadFromFile(current);
