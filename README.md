@@ -6,6 +6,8 @@ Create wallpapers by facilitating the resizing/cropping process of images that d
 
 Python 2 or 3, SFML 2.3.1
 
+Tcl/Tk - http://www.activestate.com/activetcl/downloads
+
 # Compilation Instructions
 
 $ make

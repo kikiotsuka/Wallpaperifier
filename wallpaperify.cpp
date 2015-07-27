@@ -15,9 +15,9 @@ const int DIRECTORY_EXISTS = 0;
 const int DIRECTORY_INVALID = 1;
 
 //call python to get file list
-#ifdef _WIN32 //windows
+#if defined(_WIN32) || defined(SYS_WINDOWS)
 const std::string PYTHON_SELECT_DIR = "py wallfolderselector.py";
-#else //unix systems
+#else
 const std::string PYTHON_SELECT_DIR = "python wallfolderselector.py";
 #endif
 

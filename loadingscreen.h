@@ -6,7 +6,7 @@
 #include "infoscreen.h"
 
 //call python to get file list
-#ifdef _WIN64 //windows 64 bit
+#ifdef SYS_WINDOWS
 const std::string PYTHON_PROCESS_IMAGES = "py wallinfo.py";
 #else //unix systems
 const std::string PYTHON_PROCESS_IMAGES = "python wallinfo.py";

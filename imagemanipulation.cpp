@@ -2,10 +2,8 @@
 
 /*
     TODO
-        - Implement flipping images horizontally
         - Implement deleting images with a confirmation thingy
-        - Potentially implement image extender
-            - Take one pixel row/column of image and repeat it outwards, only for crop mode
+        - Implement resizing image to max height dim in minimalistic mode
 */
 
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
@@ -22,13 +20,8 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 void ImageManipulation::run(sf::RenderWindow &window) {
     while (window.isOpen() && !imgnames.empty()) {
         std::string current = imgnames.front();
-        std::string imgname_without_path = "";
-        for (int i = current.size() - 1; i >= 0; i--) {
-            if (current[i] == '/' || current[i] == '\\') {
-                imgname_without_path = current.substr(i + 1);
-                break;
-            }
-        }
+        const size_t dot_pos = imgnames.rfind('.');
+        std::string imgname_without_path = imgnames.substr(dot_pos + 1);
         window.setTitle(TITLE + " - " + imgname_without_path);
         imgnames.pop();   
         texture.loadFromFile(current);
@@ -123,70 +116,7 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
                 window.close();
             } else if (e.type == sf::Event::KeyPressed) {
                 if (!finalize) {
-                    switch (e.key.code) {
-                    case sf::Keyboard::Escape:
-                        window.close();
-                        break;
-                    case sf::Keyboard::W:
-                    case sf::Keyboard::Up:
-                        selector.set_dir(UP, true);
-                        break;
-                    case sf::Keyboard::S:
-                    case sf::Keyboard::Down:
-                        selector.set_dir(DOWN, true);
-                        break;
-                    case sf::Keyboard::D:
-                    case sf::Keyboard::Right:
-                        selector.set_dir(RIGHT, true);
-                        break;
-                    case sf::Keyboard::A:
-                    case sf::Keyboard::Left:
-                        selector.set_dir(LEFT, true);
-                        break;
-                    case sf::Keyboard::Numpad8:
-                        selector.teleport(UP);
-                        break;
-                    case sf::Keyboard::Numpad2:
-                        selector.teleport(DOWN);
-                        break;
-                    case sf::Keyboard::Numpad4:
-                        selector.teleport(LEFT);
-                        break;
-                    case sf::Keyboard::Numpad6:
-                        selector.teleport(RIGHT);
-                        break;
-                    case sf::Keyboard::Numpad5:
-                    case sf::Keyboard::Num5:
-                        selector.teleport(CENTER);
-                        break;
-                    case sf::Keyboard::Space:
-                        is_black = !is_black;
-                        selector.toggle_color();
-                        break;
-                    case sf::Keyboard::C:
-                        image_status = IMAGE_SWITCH;
-                        working = false;
-                        break;
-                    case sf::Keyboard::P:
-                        image_status = IMAGE_SKIP;
-                        working = false;
-                        break;
-                    case sf::Keyboard::LShift:
-                    case sf::Keyboard::RShift:
-                        selector.set_shift(true);
-                        break;
-                    /*
-                    //Because pressing control key on Arch doesn't work
-                    case sf::Keyboard::LControl:
-                    case sf::Keyboard::RControl:
-                        std::cout << "CONTROL KEY WAS PRESSED" << "\n";
-                        break;
-                    */
-                    case sf::Keyboard::Return:
-                        finalize = true;
-                        init_preview_box();
-                        break;
-                    }
+                    main_keyboard_pressed_input(e, window, image_status, working, finalize);
                 } else {
                     if (e.key.code == sf::Keyboard::Return) {
                         if (!generate_crop_image(fname, vert_scale + horz_scale - selected_scale)) {
@@ -202,35 +132,7 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
                     }
                 }
             } else if (e.type == sf::Event::KeyReleased) {
-                switch (e.key.code) {
-                case sf::Keyboard::W:
-                case sf::Keyboard::Up:
-                    selector.set_dir(UP, false);
-                    break;
-                case sf::Keyboard::S:
-                case sf::Keyboard::Down:
-                    selector.set_dir(DOWN, false);
-                    break;
-                case sf::Keyboard::D:
-                case sf::Keyboard::Right:
-                    selector.set_dir(RIGHT, false);
-                    break;
-                case sf::Keyboard::A:
-                case sf::Keyboard::Left:
-                    selector.set_dir(LEFT, false);
-                    break;
-                case sf::Keyboard::LShift:
-                case sf::Keyboard::RShift:
-                    selector.set_shift(false);
-                    break;
-                /*
-                //For some reason pressing control keys doesn't work on Arch
-                case sf::Keyboard::LControl:
-                case sf::Keyboard::RControl:
-                    std::cout << "CONTROL KEY WAS RELEASED" << "\n";
-                    break;
-                */
-                }
+                main_keyboard_released_input(e);
             } else if (e.type == sf::Event::MouseButtonPressed) {
                 if (e.mouseButton.button == sf::Mouse::Left) {
                     mouse_down = true;
@@ -305,76 +207,18 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                 window.close();
             } else if (e.type == sf::Event::KeyPressed) {
                 if (!finalize && !key_f) {
-                    switch (e.key.code) {
-                    case sf::Keyboard::Escape:
-                        window.close();
-                        break;
-                    case sf::Keyboard::W:
-                    case sf::Keyboard::Up:
-                        selector.set_dir(UP, true);
-                        break;
-                    case sf::Keyboard::S:
-                    case sf::Keyboard::Down:
-                        selector.set_dir(DOWN, true);
-                        break;
-                    case sf::Keyboard::D:
-                    case sf::Keyboard::Right:
-                        selector.set_dir(RIGHT, true);
-                        break;
-                    case sf::Keyboard::A:
-                    case sf::Keyboard::Left:
-                        selector.set_dir(LEFT, true);
-                        break;
-                    case sf::Keyboard::Numpad8:
-                        selector.teleport(UP);
-                        break;
-                    case sf::Keyboard::Numpad2:
-                        selector.teleport(DOWN);
-                        break;
-                    case sf::Keyboard::Numpad4:
-                        selector.teleport(LEFT);
-                        break;
-                    case sf::Keyboard::Numpad6:
-                        selector.teleport(RIGHT);
-                        break;
-                    case sf::Keyboard::Numpad5:
-                    case sf::Keyboard::Num5:
-                        selector.teleport(CENTER);
-                        break;
-                    case sf::Keyboard::Space:
-                        is_black = !is_black;
-                        selector.toggle_color();
-                        break;
-                    case sf::Keyboard::C:
-                        image_status = IMAGE_SWITCH;
-                        working = false;
-                        break;
-                    case sf::Keyboard::P:
-                        image_status = IMAGE_SKIP;
-                        working = false;
-                        break;
-                    case sf::Keyboard::F:
-                        key_f = true;
-                        break;
-                    case sf::Keyboard::BackSpace:
-                        if (key_f) {
-                            fill_color = sf::Color::White;
+                    //check if input is triggered, otherwise check rest of cases specific to minimalistic mode
+                    if (!main_keyboard_pressed_input(e, window, image_status, working, finalize)) {
+                        switch (e.key.code) {
+                        case sf::Keyboard::F:
+                            key_f = true;
+                            break;
+                        case sf::Keyboard::BackSpace:
+                            if (key_f) {
+                                fill_color = sf::Color::White;
+                            }
+                            break;
                         }
-                        break;
-                    case sf::Keyboard::LShift:
-                    case sf::Keyboard::RShift:
-                        selector.set_shift(true);
-                        break;
-                    /*
-                    //Because pressing control key on Arch doesn't work
-                    case sf::Keyboard::LControl:
-                    case sf::Keyboard::RControl:
-                        std::cout << "CONTROL KEY WAS PRESSED" << "\n";
-                        break;
-                    */
-                    case sf::Keyboard::Return:
-                        finalize = true;
-                        break;
                     }
                 } else if (finalize) {
                     if (e.key.code == sf::Keyboard::Return) {
@@ -390,35 +234,7 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                     fill_color = sf::Color::White;
                 }
             } else if (e.type == sf::Event::KeyReleased) {
-                switch (e.key.code) {
-                case sf::Keyboard::W:
-                case sf::Keyboard::Up:
-                    selector.set_dir(UP, false);
-                    break;
-                case sf::Keyboard::S:
-                case sf::Keyboard::Down:
-                    selector.set_dir(DOWN, false);
-                    break;
-                case sf::Keyboard::D:
-                case sf::Keyboard::Right:
-                    selector.set_dir(RIGHT, false);
-                    break;
-                case sf::Keyboard::A:
-                case sf::Keyboard::Left:
-                    selector.set_dir(LEFT, false);
-                    break;
-                case sf::Keyboard::LShift:
-                case sf::Keyboard::RShift:
-                    selector.set_shift(false);
-                    break;
-                /*
-                //For some reason pressing control keys doesn't work on Arch
-                case sf::Keyboard::LControl:
-                case sf::Keyboard::RControl:
-                    std::cout << "CONTROL KEY WAS RELEASED" << "\n";
-                    break;
-                */
-                }
+                main_keyboard_released_input(e);
             } else if (e.type == sf::Event::MouseButtonPressed) {
                 if (e.mouseButton.button == sf::Mouse::Left) {
                     if (!key_f) {
@@ -469,6 +285,119 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
     }
 
     return image_status;
+}
+
+/*
+    Accepts user input and executes a task according to the input.
+    This function exists to remove duplicate input checks between crop/minimalist mode
+    Returns true if an input is triggered, false otherwise
+*/
+bool ImageManipulation::main_keyboard_pressed_input(sf::Event e, sf::RenderWindow &window, 
+                                                    int &image_status, bool &working, bool &finalize) {
+    switch(e.key.code) {
+    case sf::Keyboard::Escape:
+        window.close();
+        break;
+    case sf::Keyboard::W:
+    case sf::Keyboard::Up:
+        selector.set_dir(UP, true);
+        break;
+    case sf::Keyboard::S:
+    case sf::Keyboard::Down:
+        selector.set_dir(DOWN, true);
+        break;
+    case sf::Keyboard::D:
+    case sf::Keyboard::Right:
+        selector.set_dir(RIGHT, true);
+        break;
+    case sf::Keyboard::A:
+    case sf::Keyboard::Left:
+        selector.set_dir(LEFT, true);
+        break;
+    case sf::Keyboard::Numpad8:
+        selector.teleport(UP);
+        break;
+    case sf::Keyboard::Numpad2:
+        selector.teleport(DOWN);
+        break;
+    case sf::Keyboard::Numpad4:
+        selector.teleport(LEFT);
+        break;
+    case sf::Keyboard::Numpad6:
+        selector.teleport(RIGHT);
+        break;
+    case sf::Keyboard::Numpad5:
+    case sf::Keyboard::Num5:
+        selector.teleport(CENTER);
+        break;
+    case sf::Keyboard::C:
+        image_status = IMAGE_SWITCH;
+        working = false;
+        break;
+    case sf::Keyboard::P:
+        image_status = IMAGE_SKIP;
+        working = false;
+        break;
+    case sf::Keyboard::R:
+        if (sprite.getTextureRect().left != 0) {
+            sprite.setTextureRect(sf::IntRect(0, 0, texture.getSize().x, texture.getSize().y));
+        } else {
+            sprite.setTextureRect(sf::IntRect(texture.getSize().x, 0, -texture.getSize().x, texture.getSize().y)); 
+        }
+        break;
+    case sf::Keyboard::LShift:
+    case sf::Keyboard::RShift:
+        selector.set_shift(true);
+        break;
+    /*
+    //Because pressing control key on Arch doesn't work
+    case sf::Keyboard::LControl:
+    case sf::Keyboard::RControl:
+        std::cout << "CONTROL KEY WAS PRESSED" << "\n";
+        break;
+    */
+    case sf::Keyboard::Return:
+        finalize = true;
+        break;
+    default:
+        return false;
+    }
+    return true;
+}
+
+bool ImageManipulation::main_keyboard_released_input(sf::Event e) {
+    switch (e.key.code) {
+    case sf::Keyboard::W:
+    case sf::Keyboard::Up:
+        selector.set_dir(UP, false);
+        break;
+    case sf::Keyboard::S:
+    case sf::Keyboard::Down:
+        selector.set_dir(DOWN, false);
+        break;
+    case sf::Keyboard::D:
+    case sf::Keyboard::Right:
+        selector.set_dir(RIGHT, false);
+        break;
+    case sf::Keyboard::A:
+    case sf::Keyboard::Left:
+        selector.set_dir(LEFT, false);
+        break;
+    case sf::Keyboard::LShift:
+    case sf::Keyboard::RShift:
+        selector.set_shift(false);
+        break;
+    /*
+    //For some reason pressing control keys doesn't work on Arch
+    case sf::Keyboard::LControl:
+    case sf::Keyboard::RControl:
+        std::cout << "CONTROL KEY WAS RELEASED" << "\n";
+        break;
+    */
+    default:
+        return false;
+    }
+    return true;
 }
 
 /*
@@ -551,6 +480,16 @@ bool ImageManipulation::generate_minimalist_image(std::string imgname, sf::Color
 
 bool ImageManipulation::write_image(std::string imgname, const sf::Texture &t) {
     sf::Image img = t.copyToImage();
+    //bug in sfml 2.3.1, will be fixed in 2.3.2
+    //sfml 2.3.1 doesn't support saving images with extension "jpeg"
+    const size_t dot_loc = imgname.rfind('.');
+    if (dot_loc < imgname.size()) {
+        const std::string extension = imgname.substr(dot_loc + 1);
+        if (extension == "jpeg") {
+            remove(imgname.c_str());
+            imgname = imgname.substr(0, dot_loc + 1) + "jpg";
+        }
+    } 
     return img.saveToFile(imgname);
 }
 

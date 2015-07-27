@@ -54,6 +54,12 @@ private:
     int crop_image(sf::RenderWindow &window, std::string fname);
     int minimalistify_image(sf::RenderWindow &window, std::string fname);
 
+    bool main_keyboard_pressed_input(sf::Event e,
+                                     sf::RenderWindow &window,
+                                     int &image_status,
+                                     bool &working,
+                                     bool &finalize);
+    bool main_keyboard_released_input(sf::Event e);
     void initialize_selector(int mode);
 
     void init_preview_box();
