@@ -3,7 +3,7 @@
 /*
     TODO
         - Implement deleting images with a confirmation thingy
-        - Implement resizing image to max height dim in minimalistic mode
+        - Implement resizing image to max height dim in minimalistic mode, as well as reverting to original height
 */
 
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
