@@ -8,7 +8,7 @@
 #include "loadingscreen.h"
 #include "imagemanipulation.h"
 
-extern const std::string VERSION = "1.1.2";
+extern const std::string VERSION = "1.2.0";
 extern const std::string TITLE = "Wallpaperify Version " + VERSION + " by Mitsuru Otsuka";
 
 const int DIRECTORY_EXISTS = 0;
