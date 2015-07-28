@@ -3,7 +3,6 @@
 /*
     TODO
         - Implement deleting images with a confirmation thingy
-        - Implement resizing image to max height dim in minimalistic mode, as well as reverting to original height
 */
 
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
@@ -20,8 +19,12 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
 void ImageManipulation::run(sf::RenderWindow &window) {
     while (window.isOpen() && !imgnames.empty()) {
         std::string current = imgnames.front();
-        const size_t dot_pos = current.rfind('.');
-        std::string imgname_without_path = current.substr(dot_pos + 1);
+        #ifdef SYS_WINDOWS
+        const size_t slash_pos = current.rfind('\\');
+        #else
+        const size_t slash_pos = current.find('/');
+        #endif
+        std::string imgname_without_path = current.substr(slash_pos + 1);
         window.setTitle(TITLE + " - " + imgname_without_path);
         imgnames.pop();   
         texture.loadFromFile(current);
@@ -178,9 +181,12 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
 
 int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string fname) {
     int image_status = IMAGE_SUCCESS;
+
+    double vert_scale = target_dim.y / sprite.getGlobalBounds().height;
+    double toggle_scale = vert_scale;
+
     //check if the image is bigger than the window, if so resize it
     if (sprite.getGlobalBounds().height > target_dim.y) {
-        double vert_scale = target_dim.y / sprite.getGlobalBounds().height;
         sprite.setScale(vert_scale, vert_scale);
     }
 
@@ -213,6 +219,14 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                         case sf::Keyboard::F:
                             key_f = true;
                             break;
+                        case sf::Keyboard::Numpad0:
+                        case sf::Keyboard::Num0: {
+                            double current_scale = sprite.getScale().x;
+                            sprite.setScale(toggle_scale, toggle_scale);
+                            toggle_scale = current_scale;
+                            initialize_selector(MODE_MINIMALISTIC);
+                            break;
+                        }
                         case sf::Keyboard::BackSpace:
                             if (key_f) {
                                 fill_color = sf::Color::White;
