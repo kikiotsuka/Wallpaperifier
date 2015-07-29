@@ -1,10 +1,5 @@
 #include "imagemanipulation.h"
 
-/*
-    TODO
-        - Implement deleting images with a confirmation thingy
-*/
-
 ImageManipulation::ImageManipulation(int s_width, int s_height) {
     screen_dim = sf::Vector2f(s_width, s_height);
     target_dim = sf::Vector2f(s_width * SCREEN_FRACTION, s_height * SCREEN_FRACTION);
@@ -13,6 +8,7 @@ ImageManipulation::ImageManipulation(int s_width, int s_height) {
     finalize = false;
     is_black = true;
     mouse_down = false;
+    delete_image = false;
     readtochangelist();
 }
 
@@ -43,6 +39,7 @@ void ImageManipulation::run(sf::RenderWindow &window) {
             finalize = false;
             is_black = true;
             mouse_down = false;
+            delete_image = false;
 
             sf::Vector2f sprite_dim(sprite.getGlobalBounds().height, sprite.getGlobalBounds().width);
 
@@ -118,8 +115,25 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
             if (e.type == sf::Event::Closed) {
                 window.close();
             } else if (e.type == sf::Event::KeyPressed) {
-                if (!finalize) {
-                    main_keyboard_pressed_input(e, window, image_status, working, finalize);
+                if (!finalize && !delete_image) {
+                    if (!main_keyboard_pressed_input(e, window, image_status, working, finalize)) {
+                        if (e.key.code == sf::Keyboard::Space) {
+                            is_black = !is_black;
+                            selector.toggle_color();
+                        } else if (e.key.code == sf::Keyboard::Delete) {
+                            delete_image = true;
+                            sprite.setColor(sf::Color::Red);
+                        }
+                    }
+                } else if (delete_image) {
+                    if (e.key.code == sf::Keyboard::Escape) {
+                        sprite.setColor(sf::Color::White);
+                        delete_image = false;
+                    } else if (e.key.code == sf::Keyboard::Delete) {
+                        remove(fname.c_str());
+                        working = false;
+                        image_status = IMAGE_SUCCESS;
+                    }
                 } else {
                     if (e.key.code == sf::Keyboard::Return) {
                         if (!generate_crop_image(fname, vert_scale + horz_scale - selected_scale)) {
@@ -212,7 +226,7 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
             if (e.type == sf::Event::Closed) {
                 window.close();
             } else if (e.type == sf::Event::KeyPressed) {
-                if (!finalize && !key_f) {
+                if (!finalize && !key_f && !delete_image) {
                     //check if input is triggered, otherwise check rest of cases specific to minimalistic mode
                     if (!main_keyboard_pressed_input(e, window, image_status, working, finalize)) {
                         switch (e.key.code) {
@@ -232,6 +246,10 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                                 fill_color = sf::Color::White;
                             }
                             break;
+                        case sf::Keyboard::Delete:
+                            sprite.setColor(sf::Color::Red);
+                            delete_image = true;
+                            break;
                         }
                     }
                 } else if (finalize) {
@@ -246,6 +264,14 @@ int ImageManipulation::minimalistify_image(sf::RenderWindow &window, std::string
                 } else if (key_f) {
                     key_f = false;
                     fill_color = sf::Color::White;
+                } else if (delete_image) {
+                    if (e.key.code == sf::Keyboard::Escape) {
+                        sprite.setColor(sf::Color::White);
+                        delete_image = false;
+                    } else if (e.key.code == sf::Keyboard::Delete) {
+                        remove(fname.c_str());
+                        working = false;
+                    }
                 }
             } else if (e.type == sf::Event::KeyReleased) {
                 main_keyboard_released_input(e);

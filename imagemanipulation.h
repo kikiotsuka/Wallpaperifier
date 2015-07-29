@@ -43,6 +43,7 @@ private:
     std::pair<sf::Vector2i, sf::Vector2i> movement;
 
     bool is_black;
+    bool delete_image;
 
     std::queue<std::string> imgnames;
     //target_dim is screen_dim * SCREEN_FRACTION

@@ -27,6 +27,7 @@ Use the number pad to teleport region selector around.
 You can also hold Control and use the direction keys as a substitute for the numberpad directions.
 If using Control + Direction keys as a substitute, press '5' to center the image
 Press P to skip the current image and come back to it later
+Press DELETE twice to delete the current image, press escape to cancel deletion
 
 =Minimalistic Mode=
 
@@ -42,3 +43,4 @@ Use the number pad to move the image around.
 You can also hold Control and use the direction keys as a substitute for the numberpad directions.
 If using Control + Direction keys as a substitute, press '5' to center the image
 Press P to skip the current image and come back to it later
+Press DELETE twice to delete teh current image, press escape to cancel deletion
