@@ -14,12 +14,7 @@ extern const std::string TITLE = "Wallpaperify Version " + VERSION + " by Mitsur
 const int DIRECTORY_EXISTS = 0;
 const int DIRECTORY_INVALID = 1;
 
-//call python to get file list
-#if defined(_WIN32) || defined(SYS_WINDOWS)
-const std::string PYTHON_SELECT_DIR = "py wallfolderselector.py";
-#else
 const std::string PYTHON_SELECT_DIR = "python wallfolderselector.py";
-#endif
 
 bool check_if_file_exists(std::string fname);
 void write_screen_resolution(int &screen_width, int &screen_height);
@@ -41,8 +36,8 @@ int main(int argc, char** argv) {
 
     int screen_width, screen_height;
     write_screen_resolution(screen_width, screen_height);
-    const int WINDOW_WIDTH = screen_width * 0.85;
-    const int WINDOW_HEIGHT = screen_height * 0.85;
+    const int WINDOW_WIDTH = screen_width * SCREEN_FRACTION;
+    const int WINDOW_HEIGHT = screen_height * SCREEN_FRACTION;
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
