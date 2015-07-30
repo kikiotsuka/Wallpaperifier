@@ -5,7 +5,12 @@
 
 #include "infoscreen.h"
 
+//call python to get file list
+#ifdef SYS_WINDOWS
+const std::string PYTHON_PROCESS_IMAGES = "py wallinfo.py";
+#else //unix systems
 const std::string PYTHON_PROCESS_IMAGES = "python wallinfo.py";
+#endif
 
 class LoadingScreen : public InfoScreen {
 private:

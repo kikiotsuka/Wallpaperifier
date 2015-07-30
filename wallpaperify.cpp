@@ -14,7 +14,12 @@ extern const std::string TITLE = "Wallpaperify Version " + VERSION + " by Mitsur
 const int DIRECTORY_EXISTS = 0;
 const int DIRECTORY_INVALID = 1;
 
+//call python to get file list
+#if defined(_WIN32) || defined(SYS_WINDOWS)
+const std::string PYTHON_SELECT_DIR = "py wallfolderselector.py";
+#else
 const std::string PYTHON_SELECT_DIR = "python wallfolderselector.py";
+#endif
 
 bool check_if_file_exists(std::string fname);
 void write_screen_resolution(int &screen_width, int &screen_height);
