@@ -125,6 +125,9 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
                             sprite.setColor(sf::Color::Red);
                         }
                     }
+                    if (finalize) {
+                        init_preview_box();
+                    }
                 } else if (delete_image) {
                     if (e.key.code == sf::Keyboard::Escape) {
                         sprite.setColor(sf::Color::White);
