@@ -65,6 +65,7 @@ void ImageManipulation::run(sf::RenderWindow &window) {
         } while (image_status != IMAGE_SUCCESS);
     }
 
+    window.setTitle(TITLE);
     //reset the window after finished
     reset_window(window, 500, 500);
 }
@@ -529,10 +530,11 @@ bool ImageManipulation::write_image(std::string imgname, const sf::Texture &t) {
     if (dot_loc < imgname.size()) {
         const std::string extension = imgname.substr(dot_loc + 1);
         if (extension == "jpeg") {
-            remove(imgname.c_str());
             imgname = imgname.substr(0, dot_loc + 1) + "jpg";
         }
     } 
+    //First remove the image so no duplicate can be created
+    remove(imgname.c_str());
     return img.saveToFile(imgname);
 }
 
