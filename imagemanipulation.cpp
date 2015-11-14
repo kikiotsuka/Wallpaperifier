@@ -41,6 +41,9 @@ void ImageManipulation::run(sf::RenderWindow &window) {
             mouse_down = false;
             delete_image = false;
 
+            //Log file name
+            std::cout << imgname_without_path << "\n";
+
             sf::Vector2f sprite_dim(sprite.getGlobalBounds().height, sprite.getGlobalBounds().width);
 
             if (force_mode == 1 || (force_mode == 0 && sprite_dim.x < sprite_dim.y)) {
@@ -95,6 +98,7 @@ int ImageManipulation::crop_image(sf::RenderWindow &window, std::string fname) {
     }
 
     sprite.setScale(selected_scale, selected_scale);
+    sprite.setColor(sf::Color::White);
     reset_window(window, sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
 
     initialize_selector(MODE_CROP);
